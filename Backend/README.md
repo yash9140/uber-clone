@@ -1,15 +1,19 @@
-# /users/register Endpoint Documentation
+# API Endpoint Documentation
 
-## Description
+---
+
+## /users/register Endpoint
+
+### Description
 
 The `/users/register` endpoint registers a new user. It accepts user details, hashes the password, creates a user record, and returns an authentication token along with the user information.
 
-## HTTP Method and URL
+### HTTP Method and URL
 
 - **Method:** POST  
 - **URL:** `/users/register`
 
-## Request Body
+### Request Body
 
 The request payload must be in JSON format with the following structure:
 
@@ -24,9 +28,9 @@ The request payload must be in JSON format with the following structure:
 }
 ```
 
-## Response
+### Response
 
-### Success Response
+#### Success Response
 
 - **Status Code:** `201 Created`
 - **Content:**
@@ -46,7 +50,7 @@ The request payload must be in JSON format with the following structure:
 }
 ```
 
-### Error Response
+#### Error Response
 
 - **Status Code:** `400 Bad Request`
 - **Content:**
@@ -64,9 +68,90 @@ The request payload must be in JSON format with the following structure:
 }
 ```
 
-## Notes
+### Notes
 
-- The endpoint uses `express-validator` to validate inputs.
-- Failing validations (e.g., invalid email, short firstname or password) will return a `400 Bad Request` status.
-- Passwords are hashed using bcrypt before being saved to the database.
+- Uses `express-validator` to validate inputs.
+- Passwords are hashed using bcrypt before storage.
 - A JSON Web Token (JWT) is generated upon successful registration.
+
+---
+
+## /users/login Endpoint
+
+### Description
+
+The `/users/login` endpoint authenticates a user. It verifies the provided credentials and returns an authentication token along with the user information if successful.
+
+### HTTP Method and URL
+
+- **Method:** POST  
+- **URL:** `/users/login`
+
+### Request Body
+
+The request payload must be in JSON format with the following structure:
+
+```json
+{
+  "email": "john.doe@example.com", // Required, must be a valid email
+  "password": "password123"          // Required, minimum 6 characters
+}
+```
+
+### Response
+
+#### Success Response
+
+- **Status Code:** `200 OK`
+- **Content:**
+
+```json
+{
+  "token": "<JWT_TOKEN>",
+  "user": {
+    "_id": "<USER_ID>",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com"
+    // Additional user fields may be present.
+  }
+}
+```
+
+#### Error Response
+
+- **Validation Error:**
+  - **Status Code:** `400 Bad Request`
+  - **Content:**
+
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "Validation error message",
+          "param": "field_name",
+          "location": "body"
+        }
+        // More errors if validations fail.
+      ]
+    }
+    ```
+
+- **Authentication Failure:**
+  - **Status Code:** `401 Unauthorized`
+  - **Content:**
+
+    ```json
+    {
+      "message": "Invalid email or password"
+    }
+    ```
+
+### Notes
+
+- Uses `express-validator` to validate inputs.
+- Returns `400 Bad Request` if any input fails validation.
+- Returns `401 Unauthorized` if either the email does not exist or the password does not match.
+- On successful authentication, a JSON Web Token (JWT) is generated and returned.
