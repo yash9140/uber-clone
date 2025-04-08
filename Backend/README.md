@@ -155,3 +155,72 @@ The request payload must be in JSON format with the following structure:
 - Returns `400 Bad Request` if any input fails validation.
 - Returns `401 Unauthorized` if either the email does not exist or the password does not match.
 - On successful authentication, a JSON Web Token (JWT) is generated and returned.
+
+---
+
+## /users/profile Endpoint
+
+### Description
+
+The `/users/profile` endpoint retrieves the profile of the authenticated user. The user information is attached to the request object by authentication middleware.
+
+### HTTP Method and URL
+
+- **Method:** GET  
+- **URL:** `/users/profile`
+
+### Response
+
+#### Success Response
+
+- **Status Code:** `200 OK`
+- **Content:**
+
+```json
+{
+  "_id": "<USER_ID>",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "john.doe@example.com"
+  // Additional user fields may be present.
+}
+```
+
+#### Error Response
+
+- An error will be returned if the request is not authenticated, typically with a `401 Unauthorized` status code.
+
+---
+
+## /users/logout Endpoint
+
+### Description
+
+"The `/users/logout` endpoint logs out the authenticated user by clearing the authentication token from the browser cookies and adding the token to a blacklist to prevent further use."
+
+logout the current user and blacklist the token in cookie or headers
+
+### HTTP Method and URL
+
+- **Method:** GET  
+- **URL:** `/users/logout`
+
+### Response
+
+#### Success Response
+
+- **Status Code:** `200 OK`
+- **Content:**
+
+```json
+{
+  "message": "Logged Out"
+}
+```
+
+### Notes
+
+- The endpoint clears the cookie named `token`.
+- The token is also stored in a blacklist to invalidate further usage.
