@@ -156,71 +156,94 @@ The request payload must be in JSON format with the following structure:
 - Returns `401 Unauthorized` if either the email does not exist or the password does not match.
 - On successful authentication, a JSON Web Token (JWT) is generated and returned.
 
+# Captain API Endpoint Documentation
+
 ---
 
-## /users/profile Endpoint
+## /captain/register Endpoint
 
 ### Description
 
-The `/users/profile` endpoint retrieves the profile of the authenticated user. The user information is attached to the request object by authentication middleware.
+Registers a new captain by accepting captain details along with vehicle information. The endpoint creates a captain record, hashes the password, and generates an authentication token upon successful registration.
 
 ### HTTP Method and URL
 
-- **Method:** GET  
-- **URL:** `/users/profile`
+- **Method:** POST  
+- **URL:** `/captain/register`
+
+### Request Body
+
+The request payload must be in JSON format with the following structure:
+
+```json
+{
+  "fullname": {
+    "firstname": "Jane",          // Required, minimum 3 characters
+    "lastname": "Doe"             // Required, minimum 3 characters
+  },
+  "email": "jane.doe@example.com", // Required, must be a valid email
+  "password": "password123",       // Required, minimum 6 characters
+  "vehicle": {
+    "color": "Red",                // Required, minimum 3 characters
+    "plate": "ABC123",             // Required, minimum 3 characters
+    "capacity": 4,                 // Required, integer greater than or equal to 1
+    "vehicleType": "car"           // Required, must be one of: car, bus, motorcycle
+  }
+}
+```
 
 ### Response
 
 #### Success Response
 
-- **Status Code:** `200 OK`
+- **Status Code:** `201 Created`
 - **Content:**
 
 ```json
 {
-  "_id": "<USER_ID>",
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  },
-  "email": "john.doe@example.com"
-  // Additional user fields may be present.
+  "token": "<JWT_TOKEN>",
+  "captain": {
+    "_id": "<CAPTAIN_ID>",
+    "fullname": {
+      "firstname": "Jane",
+      "lastname": "Doe"
+    },
+    "email": "jane.doe@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+    // Additional captain fields may be present.
+  }
 }
 ```
 
 #### Error Response
 
-- An error will be returned if the request is not authenticated, typically with a `401 Unauthorized` status code.
+- **Validation Error:**
+  - **Status Code:** `400 Bad Request`
+  - **Content:**
 
----
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "Validation error message",
+          "param": "field_name",
+          "location": "body"
+        }
+        // More errors if validations fail.
+      ]
+    }
+    ```
 
-## /users/logout Endpoint
-
-### Description
-
-"The `/users/logout` endpoint logs out the authenticated user by clearing the authentication token from the browser cookies and adding the token to a blacklist to prevent further use."
-
-logout the current user and blacklist the token in cookie or headers
-
-### HTTP Method and URL
-
-- **Method:** GET  
-- **URL:** `/users/logout`
-
-### Response
-
-#### Success Response
-
-- **Status Code:** `200 OK`
-- **Content:**
-
-```json
-{
-  "message": "Logged Out"
-}
-```
+- **Other Errors:**
+  - Errors related to missing or invalid fields will also return a `400 Bad Request` status with an appropriate error message.
 
 ### Notes
 
-- The endpoint clears the cookie named `token`.
-- The token is also stored in a blacklist to invalidate further usage.
+- Input is validated using `express-validator`.
+- Passwords are hashed using bcrypt before storage.
+- On successful registration, a JSON Web Token (JWT) is generated and returned along with the newly created captain's information.
